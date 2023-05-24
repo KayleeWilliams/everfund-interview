@@ -1,5 +1,10 @@
 import { useQuery } from '@apollo/client'
-import { CurrencyPoundIcon } from '@heroicons/react/24/outline'
+import {
+  CalendarDaysIcon,
+  CurrencyPoundIcon,
+  GiftIcon,
+  IdentificationIcon,
+} from '@heroicons/react/24/outline'
 
 import { MetaTags } from '@redwoodjs/web'
 
@@ -97,13 +102,30 @@ const HomePage = () => {
         <Table.table className="min-w-full divide-y divide-gray-300">
           <Table.thead>
             <Table.tr>
-              <Table.th>ID</Table.th>
-              <Table.th className="flex flex-row items-center gap-2">
-                <CurrencyPoundIcon className="h-6 w-6" />
-                Amount Paid
+              <Table.th>
+                <div className="flex flex-row items-center gap-2">
+                  <IdentificationIcon className="h-6 w-6" />
+                  ID
+                </div>
               </Table.th>
-              <Table.th className="">Date</Table.th>
-              <Table.th className="">Gift Aided</Table.th>
+              <Table.th>
+                <div className="flex flex-row items-center gap-2">
+                  <CurrencyPoundIcon className="h-6 w-6" />
+                  Amount Paid
+                </div>
+              </Table.th>
+              <Table.th>
+                <div className="flex flex-row items-center gap-2">
+                  <CalendarDaysIcon className="h-6 w-6" />
+                  Date
+                </div>
+              </Table.th>
+              <Table.th>
+                <div className="flex flex-row items-center gap-2">
+                  <GiftIcon className="h-6 w-6" />
+                  Gift Aided
+                </div>
+              </Table.th>
             </Table.tr>
           </Table.thead>
           <Table.tbody>
