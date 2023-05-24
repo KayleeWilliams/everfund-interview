@@ -1,21 +1,67 @@
+import { useQuery } from '@apollo/client'
+import { CurrencyPoundIcon } from '@heroicons/react/24/outline'
+
 import { MetaTags } from '@redwoodjs/web'
 
 import Stats from 'src/components/Stats/Stats'
-// import { useNonProfitContext } from 'src/layouts/MainLayout/MainLayout.context'
+import Table from 'src/components/Table/Table'
+import { useNonProfitContext } from 'src/layouts/MainLayout/MainLayout.context'
 
 const HomePage = () => {
-  // How to pull the nonpofit ID form context
-  // const { nonprofit, setNonProfit } = useNonProfitContext()
+  // Get non profit from context
+  const { nonprofit, setNonProfit } = useNonProfitContext()
 
+  // Queries for the homepage
+  const queries = gql`
+    query mergedQuery($nonprofitId: Int!) {
+      paymentStatsByNonprofit(nonprofitId: $nonprofitId) {
+        totalDonations
+        totalAmount
+        percentGiftAided
+      }
+      recentPaymentsByNonprofit(nonprofitId: $nonprofitId) {
+        id
+        date
+        amountPaid
+        giftAided
+        status
+      }
+    }
+  `
+
+  // Run the Queries
+  const { data, error, loading } = useQuery(queries, {
+    variables: { nonprofitId: nonprofit?.id ?? 0 },
+  })
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>{error.message}</div>
+  }
+
+  // Convert the amount to pounds
+  function toPounds(amount: number) {
+    return amount / 100
+  }
+
+  // Set the statistics for the homepage
   const homepageStats = [
-    { name: 'Total Donations', statistic: '42' },
     {
-      name: 'Total Donations Amount',
-      statistic: '£20.50',
+      name: 'Total Donations',
+      statistic: data.paymentStatsByNonprofit.totalDonations,
     },
     {
-      name: 'Donations with Gift Aid (%)',
-      statistic: '57%',
+      name: 'Total Donations Amount',
+      statistic: toPounds(data.paymentStatsByNonprofit.totalAmount),
+    },
+    {
+      name: 'Donations with Gift Aid',
+      statistic: `${(
+        data.paymentStatsByNonprofit.percentGiftAided * 100
+      ).toFixed(2)} %`,
     },
   ]
 
@@ -47,33 +93,42 @@ const HomePage = () => {
         </h2>
       </div>
 
-      <div className="relative h-96 overflow-hidden rounded-xl border border-dashed border-gray-400 opacity-75">
-        {/*
-         * TODO: Replace this component with a table component that is already supplied in the components folder
-         * */}
-        <svg
-          className="absolute inset-0 h-full w-full stroke-gray-900/10"
-          fill="none"
-        >
-          <defs>
-            <pattern
-              id="pattern-003a54e1-93b5-4534-9ccb-0ed8812b8270"
-              x="0"
-              y="0"
-              width="10"
-              height="10"
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M-3 13 15-5M-5 5l18-18M-1 21 17 3"></path>
-            </pattern>
-          </defs>
-          <rect
-            stroke="none"
-            fill="url(#pattern-003a54e1-93b5-4534-9ccb-0ed8812b8270)"
-            width="100%"
-            height="100%"
-          ></rect>
-        </svg>
+      <div className="relative h-max rounded-xl border border-dashed border-gray-400 opacity-75">
+        <Table.table className="min-w-full divide-y divide-gray-300">
+          <Table.thead>
+            <Table.tr>
+              <Table.th>ID</Table.th>
+              <Table.th className="flex flex-row items-center gap-2">
+                <CurrencyPoundIcon className="h-6 w-6" />
+                Amount Paid
+              </Table.th>
+              <Table.th className="">Date</Table.th>
+              <Table.th className="">Gift Aided</Table.th>
+            </Table.tr>
+          </Table.thead>
+          <Table.tbody>
+            {data.recentPaymentsByNonprofit.map((payment) => (
+              <Table.tr key={payment.id}>
+                <Table.td>{payment.id}</Table.td>
+                <Table.td>
+                  £{toPounds(payment.amountPaid).toLocaleString()}
+                </Table.td>
+                <Table.td>
+                  {new Date(payment.date).toLocaleString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })}
+                </Table.td>
+                <Table.td className="capitalize">
+                  {payment.giftAided.toString()}
+                </Table.td>
+              </Table.tr>
+            ))}
+          </Table.tbody>
+        </Table.table>
       </div>
     </>
   )

@@ -22,6 +22,17 @@ export const schema = gql`
     nonprofitId: Int!
   }
 
+  type PaymentStats {
+    "Description for totalDonations."
+    totalDonations: String!
+
+    "Description for totalAmount."
+    totalAmount: Int!
+
+    "Description for percentGiftAided."
+    percentGiftAided: Float!
+  }
+
   """
   About queries
   TODO: Add GraphQL query / queries to fetch payment statistics
@@ -32,5 +43,11 @@ export const schema = gql`
 
     "Fetch a Payment by id."
     payment(id: Int!): Payment @requireAuth
+
+    "Fetch Payments by nonprofitId, and sum total amount of donations, how much donated and % of gift aided."
+    paymentStatsByNonprofit(nonprofitId: Int!): PaymentStats @requireAuth
+
+    "Fetch the 20 most recent payments."
+    recentPaymentsByNonprofit(nonprofitId: Int!): [Payment!]! @requireAuth
   }
 `
